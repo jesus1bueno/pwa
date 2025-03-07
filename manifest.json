@@ -1,0 +1,48 @@
+{
+  "name": "Mi pagina con PWA",
+  "short_name": "PWA",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2196F3",
+  "orientation": "portrait-primary",
+  "description": "Descubre consejos, información y recursos para llevar una vida más saludable",
+  "icons": [
+    {
+      "src": "src/icons/icon-48x48.png",
+      "sizes": "48x48"
+    },
+    {
+      "src": "src/icons/icon-72x72.png",
+      "sizes": "72x72"
+    },
+    {
+      "src": "src/icons/icon-96x96.png",
+      "sizes": "96x96"
+    },
+    {
+      "src": "src/icons/icon-144x144.png",
+      "sizes": "144x144"
+    },
+    {
+      "src": "src/icons/icon-512x512.png",
+      "sizes": "512x512"
+    }
+  ],
+"screenshots": [
+    {
+      "src": "src/icons/cap.png",
+      "sizes": "1918x1014",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "src/icons/cap1.png",
+      "sizes": "1918x1014",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+],
+  "splash_pages": null
+}
+
