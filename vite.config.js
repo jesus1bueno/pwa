@@ -5,6 +5,7 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 3000,  // Aquí defines el puerto que deseas
+    port: process.env.PORT || 3000, // Usa el puerto de Render, o 3000 si no está disponible
+    host: '0.0.0.0', // Asegura que la aplicación escuche en todas las interfaces de red
   },
 })
