@@ -13,7 +13,7 @@ const SplashScreen = ({ onComplete }) => {
 
   return (
     <div className={`splash-screen ${fade ? "fade-out" : ""}`}>
-      <img src="/icons/icon-192x192.png" alt="Logo de la app" />
+      <img src="src/icons/icon-512x512.png" alt="Logo de la app" />
     </div>
   );
 };
