@@ -6,7 +6,7 @@ import { BrowserRouter } from 'react-router-dom';
 import keys from '../keys.json'
 
 
-async function registerServiceWorkerAndSubscribe() {
+export async function registerServiceWorkerAndSubscribe() {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js', { type: 'module' })
       .then(async (registro) => {
@@ -33,8 +33,16 @@ async function registerServiceWorkerAndSubscribe() {
   
                 const result = await response.json();
                 console.log(' Respuesta del backend:', result);
+
+                if (Notification.permission === 'granted') {
+                  new Notification('Notificación Activa', {
+                    body: '¡Ya estás suscrito a las notificaciones!',
+                    icon: '/src/icons/icon-96x96.png' // Reemplaza con el ícono de tu preferencia
+                  });
+                }
+                
               } catch (error) {
-                console.error(' Error al guardar suscripción en el backend:', error);
+                console.error('❌ Error al suscribirse o enviar la suscripción al backend:', error);
               }
             });
           }
@@ -44,7 +52,7 @@ async function registerServiceWorkerAndSubscribe() {
   }  
 }
 
-registerServiceWorkerAndSubscribe(); 
+
 
 // Inicializar IndexedDB
 let db = window.indexedDB.open('database');
@@ -55,3 +63,8 @@ createRoot(document.getElementById('root')).render(
     <App />
   </BrowserRouter>
 );
+
+
+
+
+
