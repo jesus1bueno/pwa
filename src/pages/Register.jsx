@@ -1,17 +1,20 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
+
+
 const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
+  console.log(API_URL);
 
   const handleRegister = async (e) => {
     e.preventDefault();
     const userData = { email, password };
 
     try {
-      const response = await axios.post('http://localhost:5000/auth/register', userData);
+      const response = await axios.post('https://server-1yxj.onrender.com/auth/register', userData);
       setMessage(response.data.message);
     } catch (err) {
       setMessage('Error al registrarse. Guardado en espera de conexión.');

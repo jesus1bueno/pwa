@@ -175,7 +175,7 @@ function deleteDataFromIndexedDB() {
 // Función para enviar los datos a la base de datos externa
 function sendDataToExternalDatabase(data) {
   // Aquí se puede utilizar `fetch` o cualquier otra API para enviar los datos a la base de datos externa
-  fetch('http://localhost:5000/auth/register', {
+  fetch('https://server-1yxj.onrender.com/auth/register', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -240,7 +240,7 @@ self.addEventListener('sync', event => {
                         }
 
                         let postPromises = usuarios.map(usuario =>
-                            fetch('http://localhost:5000/auth/register', {
+                            fetch('https://server-1yxj.onrender.com/auth/register', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify(usuario)
