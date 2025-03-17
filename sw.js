@@ -3,21 +3,26 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open('appShell-v5').then(cache => {
       return cache.addAll([
-        "/",
-        "/index.html",
-        "/manifest.json",
-        "/src/App.jsx",
+        //"/",
+        
+        "/index.html",  
+        "/src/index.html",
         "/src/App.css",
-        "/src/SplashScreen.jsx",
+        "/src/App.jsx",
+        "/src/main.jsx",
+
+
+       // "/manifest.json",
+        //"/src/SplashScreen.jsx",
         "/src/pages/Home.jsx",
         "/src/pages/Login.jsx",
         "/src/pages/Register.jsx",
 
-        "/src/icons/icon-96x96.png",
-        "/src/icons/icon-144x144.png",
-        "/src/icons/icon-192x192.png",
-        "/src/icons/cap.png",
-        "/src/icons/cap1.png"
+        //"/src/icons/icon-96x96.png",
+        //"/src/icons/icon-144x144.png",
+        //"/src/icons/icon-192x192.png",
+        //"/src/icons/cap.png",
+        //"/src/icons/cap1.png"
       ]);
     })
   );
