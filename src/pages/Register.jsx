@@ -6,6 +6,7 @@ import axios from 'axios';
 const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error,setError] = useState('');
   const [message, setMessage] = useState('');
 
   const handleRegister = async (e) => {
@@ -13,22 +14,45 @@ const Register = () => {
     const userData = { email, password };
 
     try {
-      const response = await axios.post('https://server-1yxj.onrender.com/auth/register', userData);
-      setMessage(response.data.message);
-    } catch (err) {
-      setMessage('Error al registrarse. Guardado en espera de conexión.');
-      insertIndexedDB(userData);
+        const response = await fetch('https://server-1yxj.onrender.com/api/registro', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(userData),
+        });
 
-      // Registrar la sincronización si el navegador lo soporta
-  if ('serviceWorker' in navigator && 'SyncManager' in window) {
-    navigator.serviceWorker.ready.then(registration => {
-      registration.sync.register('syncRegistro')
-        .then(() => console.log("Sincronización registrada"))
-        .catch(err => console.error("Error registrando sincronización", err));
-    });
-  }
+        let data;
+        try {
+            data = await response.json();
+        } catch (jsonError) {
+            console.error("Error al convertir la respuesta en JSON:", jsonError);
+            setError("Error inesperado en la respuesta del servidor.");
+            return;
+        }
+
+        if (response.ok) {
+            alert('Registro exitoso');
+            navigate('/login');
+        } else {
+            setError(data.message || 'Error al registrarse');
+        }
+    } catch (err) {
+        console.error("Error en la solicitud:", err);
+        setMessage('Error al registrarse. Guardado en espera de conexión.');
+        insertIndexedDB(userData);
+
+        // Registrar la sincronización si el navegador lo soporta
+        if ('serviceWorker' in navigator && 'SyncManager' in window) {
+            navigator.serviceWorker.ready.then(registration => {
+                registration.sync.register('syncRegistro')
+                    .then(() => console.log("Sincronización registrada"))
+                    .catch(err => console.error("Error registrando sincronización", err));
+            });
+        }
     }
-  };
+};
+
 
   function insertIndexedDB(data) {
     const request = indexedDB.open("database", 1);

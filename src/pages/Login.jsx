@@ -3,10 +3,10 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import {registerServiceWorkerAndSubscribe} from '../main'
 
 const Login = () => {
   const [email, setEmail] = useState('');
+  const [error, setError] = useState('')
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
@@ -14,21 +14,29 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('https://server-1yxj.onrender.com/auth/login', {
+      const response = await axios.post('https://server-1yxj.onrender.com/api/login', {
         email,
         password,
       });
-      setMessage(response.data.message);
+      const data = response.data; // No necesitas response.json()
 
-      await registerServiceWorkerAndSubscribe();
-      
-      navigate('/');
+    if (response.status === 200) {
+      // Guardar solo el ID del usuario en localStorage
+      localStorage.setItem('userId', data.user._id);
+      localStorage.setItem('userRole', data.user.role);
+      console.log(localStorage.getItem('userId'));
 
-    }catch (err) {
-      console.error('❌ Error en el login:', err);
-      setError('Credenciales incorrectas')
+    
+      alert('Inicio de sesión exitoso');
+      navigate('/main');
+
+    } else {
+      setError(data.message || 'Error al iniciar sesión. Verifica tus credenciales.');
     }
-  };
+  } catch (err) {
+    setError('No se pudo conectar al servidor. Inténtalo nuevamente más tarde.');
+  }
+};
 
   return (
     <div style={styles.container}>

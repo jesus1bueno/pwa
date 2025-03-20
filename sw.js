@@ -16,6 +16,7 @@ self.addEventListener('install', event => {
         //"/src/SplashScreen.jsx",
         "/src/pages/Home.jsx",
         "/src/pages/Login.jsx",
+        "/src/pages/Main.jsx",
         "/src/pages/Register.jsx",
 
         //"/src/icons/icon-96x96.png",
