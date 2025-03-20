@@ -1,16 +1,13 @@
 .splash-screen {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw; /* Usa viewport width en lugar de % */
-  height: 100vh; /* Usa viewport height en lugar de % */
-  background-color: #2196F3; /* Color de fondo */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: opacity 0.5s ease-out;
-}
-
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background-color: #2196F3; /* Igual al theme_color */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.5s ease-out;
+  }
   
   .splash-screen.fade-out {
     opacity: 0;
