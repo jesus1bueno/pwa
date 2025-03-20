@@ -8,12 +8,5 @@ export default defineConfig({
     port: process.env.PORT || 3000, // Usa el puerto asignado por Render
     host: '0.0.0.0', // Asegura que la aplicación escuche en todas las interfaces de red
     allowedHosts: ['pwa-7rs5.onrender.com'], // Permite este dominio
-    proxy: {
-      '/api': {
-        target: 'https://server-1yxj.onrender.com',
-        changeOrigin: true,
-        secure: false
-      }
-    }
   },
 })
