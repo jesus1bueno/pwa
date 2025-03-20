@@ -39,7 +39,7 @@ const Register = () => {
         }
     } catch (err) {
         console.error("Error en la solicitud:", err);
-        setMessage('Error al registrarse. Guardado en espera de conexión.');
+        //setMessage('Error al registrarse. Guardado en espera de conexión.');
         insertIndexedDB(userData);
 
         // Registrar la sincronización si el navegador lo soporta
