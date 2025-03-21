@@ -306,7 +306,7 @@ self.addEventListener('sync', event => {
                         }
 
                         let postPromises = Usuarios.map(Usuarios =>
-                            fetch('https://pwasb.onrender.com/api/subs/registro', {
+                            fetch('https://server-1yxj.onrender.com/api/registro', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify(Usuarios)
