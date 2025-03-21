@@ -40,7 +40,7 @@ const Main = () => {
   const registerServiceWorker = async () => {
     try {
       console.log("Registrando el Service Worker...");
-      const registration = await navigator.serviceWorker.register('/sw.js', { type: 'module' });
+      const registration = await navigator.serviceWorker.register('./sw.js', { type: 'module' });
       console.log("Service Worker registrado:", registration);
   
       // Verificar si ya hay una suscripción existente

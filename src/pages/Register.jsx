@@ -117,6 +117,7 @@ function InsertIndexedDB(data) {
 
           // Verificamos que el object store exista antes de hacer la transacción
       if (!db.objectStoreNames.contains("Usuarios")) {
+        console.log(db.objectStoreNames.contains);
         console.error("❌ El object store 'Usuarios' no existe.");
         return;
       }

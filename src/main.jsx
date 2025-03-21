@@ -61,6 +61,10 @@ navigator.serviceWorker.register('./sw.js', { type: 'module' })
 
 // Inicializar IndexedDB
 let db = window.indexedDB.open('database');
+db.onupgradeneeded = (event) => {
+  let result = event.target.result;
+  result.createObjectStore("Usuarios", { autoIncrement: true });
+};
 
 
 createRoot(document.getElementById('root')).render(

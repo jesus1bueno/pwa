@@ -9,13 +9,7 @@ import SplashScreen from './SplashScreen';
 const App = () => {
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js', { type: 'module' })
-        .then(registration => console.log('Service Worker registrado:', registration))
-        .catch(error => console.error('Error al registrar el Service Worker:', error));
-    }
-  }, []);
+
 
   return (
     loading ? (

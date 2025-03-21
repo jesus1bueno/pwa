@@ -29,305 +29,149 @@ self.addEventListener('install', event => {
   );
   self.skipWaiting();
 });
+function InsertIndexedDB(data){
+  let db = indexedDB.open("database"); // Eliminamos window.
 
-function InsertIndexedDB(data) {
-  let dbRequest = window.indexedDB.open("database");
-
-  dbRequest.onupgradeneeded = event => {
-    let db = event.target.result;
-    if (!db.objectStoreNames.contains("Libros")) {
-      db.createObjectStore("Libros", { keyPath: "id", autoIncrement: true });
-    }
+  db.onupgradeneeded = event => {
+      let db = event.target.result;
+      if (!db.objectStoreNames.contains("Usuarios")) {
+          db.createObjectStore("Usuarios", { keyPath: "id", autoIncrement: true });
+      }
   };
 
-  dbRequest.onsuccess = event => {
-    let db = event.target.result;
-    let transaction = db.transaction("Libros", "readwrite");
-    let obj = transaction.objectStore("Libros");
-    const result = obj.add(data);
+  db.onsuccess=event=>
+  {
+      let result=event.target.result;
 
-    result.onsuccess = event2 => {
-      console.log("Inserción exitosa en IndexedDB:", event2.target.result);
-      self.registration.sync.register("syncLibros");
-    };
-  };
+      let transaction=result.transaction("Usuarios","readwrite");
+      let obj=transaction.objectStore("Usuarios");
 
-  dbRequest.onerror = event => {
-    console.error("Error al abrir IndexedDB:", event.target.error);
+      const resultado=obj.add(data);
+
+      resultado.onsuccess=event2=>
+      {
+          //console.log("insersion",event2.target.result);
+          self.registration.sync.register("syncUsuarios");
+      }
+  }
+  
+  db.onerror = event => {
+      console.error("Error al abrir IndexedDB:", event.target.error);
   };
 }
 
-self.addEventListener("activate", event => {
-  event.waitUntil(
-    caches.keys().then(keys => {
-      return Promise.all(
-        keys.filter(key => key !== "appShell-v5" && key !== "dinamico-v5")
-            .map(key => caches.delete(key))
-      );
-    })
-  );
+
+self.addEventListener("activate",event=>{
+  caches.delete("appShell-v5");
+  caches.delete("dinamico-v5");
 });
 
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request).then(cachedResponse => {
-      if (cachedResponse) {
-        console.log("Respuesta obtenida del cache para:", event.request.url);
-        return cachedResponse;
-      }
 
-      return fetch(event.request).then(networkResponse => {
-        if (!networkResponse) {
-          throw new Error('Network response was null or undefined');
-        }
 
-        // Guardar en cache si la respuesta es exitosa
-        return caches.open('dinamico-v5').then(cache => {
-          cache.put(event.request, networkResponse.clone());
-          console.log("Respuesta guardada en cache para:", event.request.url);
-          return networkResponse;
-        });
-      }).catch(error => {
-        console.error('Fetch failed:', error);
-        // Si no hay conexión o falla la petición, intentar buscar en el cache
-        return caches.match(event.request).then(cachedResponse => {
-          if (cachedResponse) {
-            console.log("Respuesta obtenida del cache debido a fallo de red:", event.request.url);
-            return cachedResponse;
+self.addEventListener('fetch', event=>{
+  
+  /*caches.match(event.request)
+  .then();*/
+  if (!event.request.url.startsWith("http")) return; // Evita errores con extensiones
+
+
+  if (event.request.method === "POST") {
+      event.request.clone().json()
+          .then(body => {
+              return fetch(event.request).catch(() => {
+                  InsertIndexedDB(body);
+                  return new Response(JSON.stringify({ message: "Datos guardados offline" }), { headers: { "Content-Type": "application/json" } });
+              });
+          })
+          .catch(error => console.error("Error al procesar el body del POST:", error));
+  } else {
+
+      const respuesta = fetch (event.request)
+      .then(resp=>{
+          if(!resp){
+              return caches.match(event.request);
+          }else{
+             caches.open('dinamico-v6')
+             .then(cache=>{
+              cache.put(event.request, resp);
+              })
+          return resp.clone();
           }
-          // Si no hay respuesta en caché, devolver una respuesta de error
-          return new Response('Network error occurred and no cache is available', {
-            status: 503,
-            statusText: 'Service Unavailable'
-          });
-        });
+          
+      })
+      .catch(error=>{
+          //console.log(error);
+          self.registration.sync.register("insertar");
+          return caches.match(event.request)
       });
-    })
-  );
-});
-
-// Abre o crea la base de datos IndexedDB
-function openDatabase() {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open('myDatabase', 1);
-
-    request.onupgradeneeded = function(event) {
-      const db = event.target.result;
-      // Crea un almacén de objetos para almacenar los datos
-      if (!db.objectStoreNames.contains('myDataStore')) {
-        db.createObjectStore('myDataStore', { keyPath: 'id' });
-      }
-    };
-
-    request.onsuccess = function(event) {
-      resolve(event.target.result);
-    };
-
-    request.onerror = function(event) {
-      reject('Error al abrir la base de datos');
-    };
-  });
-}
-
-// Función para guardar datos en IndexedDB
-function saveDataToIndexedDB(data) {
-  openDatabase().then(db => {
-    const transaction = db.transaction(['myDataStore'], 'readwrite');
-    const store = transaction.objectStore('myDataStore');
-    store.put(data);
-
-    transaction.oncomplete = function() {
-      console.log('Datos guardados correctamente en IndexedDB:', data);
-    };
-
-    transaction.onerror = function() {
-      console.error('Error al guardar los datos:', data);
-    };
-  }).catch(error => {
-    console.error(error);
-  });
-}
-
-// Función para recuperar los datos de IndexedDB
-function getDataFromIndexedDB() {
-  return new Promise((resolve, reject) => {
-    openDatabase().then(db => {
-      const transaction = db.transaction(['myDataStore'], 'readonly');
-      const store = transaction.objectStore('myDataStore');
-      const request = store.getAll(); // Obtener todos los registros
-
-      request.onsuccess = function() {
-        resolve(request.result); // Resolver los datos obtenidos
-      };
-
-      request.onerror = function() {
-        reject("Error al recuperar los datos de IndexedDB");
-      };
-    }).catch(error => {
-      reject("Error al abrir la base de datos");
-    });
-  });
-}
-
-// Función para eliminar los datos de IndexedDB
-function deleteDataFromIndexedDB() {
-  openDatabase().then(db => {
-    const transaction = db.transaction(['myDataStore'], 'readwrite');
-    const store = transaction.objectStore('myDataStore');
-    const request = store.clear(); // Eliminar todos los registros
-
-    request.onsuccess = function() {
-      console.log("Datos eliminados de IndexedDB");
-    };
-
-    request.onerror = function() {
-      console.error("Error al eliminar los datos de IndexedDB");
-    };
-  }).catch(error => {
-    console.error(error);
-  });
-}
-
-// Función para enviar los datos a la base de datos externa
-function sendDataToExternalDatabase(data) {
-  // Aquí se puede utilizar `fetch` o cualquier otra API para enviar los datos a la base de datos externa
-  fetch('https://server-1yxj.onrender.com/auth/register', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  })
-  .then(response => response.json())
-  .then(data => {
-    console.log('Datos enviados a la base de datos externa:', data);
-    deleteDataFromIndexedDB(); // Eliminar datos de IndexedDB después de ser enviados
-  })
-  .catch(error => {
-    console.error('Error al enviar datos a la base de datos externa:', error);
-  });
-}
-/*
-// Detectar la reconexión a Internet
-window.addEventListener('online', () => {
-  console.log('Conectado a Internet');
-  // Recuperar los datos de IndexedDB y enviarlos a la base de datos externa
-  getDataFromIndexedDB().then(data => {
-    if (data.length > 0) {
-      console.log('Enviando datos a la base de datos externa:', data);
-      sendDataToExternalDatabase(data);
-    } else {
-      console.log('No hay datos en IndexedDB para enviar.');
-    }
-  }).catch(error => {
-    console.error('Error al obtener los datos de IndexedDB:', error);
-  });
-});*/
-
-self.addEventListener('push', event => {
-  const options = {
-    body: "Hola, cómo estás?",
-    image: "/src/icons/icon-96x96.png"
-  };
-  console.log('Notificación push recibida:', event);
-  self.registration.showNotification("Título de la Notificación", options);
+      event.respondWith(respuesta)  
+  }   
 });
 
 
-// Escuchar evento de sincronización para registrar usuarios
-self.addEventListenertt('sync', event => {
-    if (event.tag === "syncRegistro") {
-        event.waitUntil(
-            new Promise((resolve, reject) => {
-                let dbRequest = indexedDB.open("database", 1);
+self.addEventListener("push", (event) => {
 
-                dbRequest.onsuccess = event => {
-                    let db = event.target.result;
-                    let transaction = db.transaction("Usuarios", "readonly");
-                    let store = transaction.objectStore("Usuarios");
-
-                    let getAllRequest = store.getAll();
-
-                    getAllRequest.onsuccess = () => {
-                        let usuarios = getAllRequest.result;
-                        if (usuarios.length === 0) {
-                            resolve();
-                            return;
-                        }
-
-                        let postPromises = usuarios.map(usuario =>
-                            fetch('https://server-1yxj.onrender.com/auth/register', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify(usuario)
-                            })
-                        );
-
-                        Promise.all(postPromises)
-                            .then(() => {
-                                let deleteTransaction = db.transaction("Usuarios", "readwrite");
-                                let deleteStore = deleteTransaction.objectStore("Usuarios");
-                                deleteStore.clear();
-                                resolve();
-                            })
-                            .catch(reject);
-                    };
-                };
-
-                dbRequest.onerror = reject;
-            })
-        );
-    }
+  let options={
+      body:event.data.text(),
+       body: "Hola, cómo estás?",
+      image: "/src/icons/icon-96x96.png",
+  }
+  
+  self.registration.showNotification("Titulo",options); 
+   
 });
 
 
+// Escuchar evento de sincronización
 self.addEventListener('sync', event => {
-    if (event.tag === "syncUsuarios") {
-        event.waitUntil(
-            new Promise((resolve, reject) => {
-                let dbRequest = indexedDB.open("database", 1);
+  if (event.tag === "syncUsuarios") {
+      event.waitUntil(
+          new Promise((resolve, reject) => {
+              let dbRequest = indexedDB.open("database", 1);
 
-                dbRequest.onsuccess = event => {
-                    let db = event.target.result;
-                    let transaction = db.transaction("Usuarios", "readonly");
-                    let store = transaction.objectStore("Usuarios");
+              dbRequest.onsuccess = event => {
+                  let db = event.target.result;
+                  let transaction = db.transaction("Usuarios", "readonly");
+                  let store = transaction.objectStore("Usuarios");
 
-                    let getAllRequest = store.getAll();
+                  let getAllRequest = store.getAll();
 
-                    getAllRequest.onsuccess = () => {
-                        let Usuarios = getAllRequest.result;
-                        console.log("🔄 Intentando sincronizar usuarios:", Usuarios);
+                  getAllRequest.onsuccess = () => {
+                      let Usuarios = getAllRequest.result;
+                      console.log("🔄 Intentando sincronizar usuarios:", Usuarios);
 
-                        if (Usuarios.length === 0) {
-                            console.log("✅ No hay usuarios pendientes de sincronización.");
+                      if (Usuarios.length === 0) {
+                          console.log("✅ No hay usuarios pendientes de sincronización.");
 
-                            resolve();
-                            return;
-                        }
+                          resolve();
+                          return;
+                      }
 
-                        let postPromises = Usuarios.map(Usuarios =>
-                            fetch('https://server-1yxj.onrender.com/api/registro', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify(Usuarios)
-                            })
-                        );
+                      let postPromises = Usuarios.map(Usuarios =>
+                          fetch('https://server-1yxj.onrender.com/api/registro', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify(Usuarios)
+                          })
+                      );
 
-                        Promise.all(postPromises)
-                            .then(() => {
-                                console.log("✅ Usuarios sincronizados con éxito.");
+                      Promise.all(postPromises)
+                          .then(() => {
+                              console.log("✅ Usuarios sincronizados con éxito.");
 
-                                let deleteTransaction = db.transaction("Usuarios", "readwrite");
-                                let deleteStore = deleteTransaction.objectStore("Usuarios");
-                                deleteStore.clear();
-                                resolve();
-                            })
-                            .catch(reject);
-                    };
-                };
+                              let deleteTransaction = db.transaction("Usuarios", "readwrite");
+                              let deleteStore = deleteTransaction.objectStore("Usuarios");
+                              deleteStore.clear();
+                              resolve();
+                          })
+                          .catch(reject);
+                  };
+              };
 
-                dbRequest.onerror = reject;
-            })
-        );
-    }
+              dbRequest.onerror = reject;
+          })
+      );
+  }
 });
+
+//const webpush=require('web-push');
