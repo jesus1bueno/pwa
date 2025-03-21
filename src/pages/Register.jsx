@@ -55,24 +55,15 @@ const Register = () => {
         if (response.ok) {
             alert('Registro exitoso');
             navigate('/login');
-        } else {
-            setError(data.message || 'Error al registrarse');
-        }
+        // console.log(data);
+      } else {
+        setError(data.message || 'Error al registrarte.');
+      }
     } catch (err) {
-        console.error("Error en la solicitud:", err);
-        //setMessage('Error al registrarse. Guardado en espera de conexión.');
-        insertIndexedDB(userData);
-
-        // Registrar la sincronización si el navegador lo soporta
-        if ('serviceWorker' in navigator && 'SyncManager' in window) {
-            navigator.serviceWorker.ready.then(registration => {
-                registration.sync.register('syncRegistro')
-                    .then(() => console.log("Sincronización registrada"))
-                    .catch(err => console.error("Error registrando sincronización", err));
-            });
-        }
-    }
-};
+      setError('No se pudo conectar al servidor. Inténtalo nuevamente.');
+    } 
+  };
+  
 
 
 const handleRegister = async (e) => {
