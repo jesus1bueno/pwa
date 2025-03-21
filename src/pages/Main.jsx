@@ -35,6 +35,7 @@ const Main = () => {
         .catch(error => console.error('Error al cargar los usuarios:', error));
     }
   }, [userRole]);
+  
 
   const registerServiceWorker = async () => {
     try {

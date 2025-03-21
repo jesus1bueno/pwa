@@ -35,7 +35,7 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'flex-start', // Alineación hacia arriba
     minHeight: '100vh', // Cambio de height a minHeight para permitir que se ajuste a la pantalla
-    backgroundColor: '#e9ecef',
+    backgroundColor: '#ffffff',
     padding: '20px',
     boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
     paddingTop: '10px', // Reducir aún más el espacio superior

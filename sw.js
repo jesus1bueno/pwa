@@ -235,7 +235,7 @@ self.addEventListener('push', event => {
 
 
 // Escuchar evento de sincronización para registrar usuarios
-self.addEventListener('sync', event => {
+self.addEventListenertt('sync', event => {
     if (event.tag === "syncRegistro") {
         event.waitUntil(
             new Promise((resolve, reject) => {
@@ -265,6 +265,58 @@ self.addEventListener('sync', event => {
 
                         Promise.all(postPromises)
                             .then(() => {
+                                let deleteTransaction = db.transaction("Usuarios", "readwrite");
+                                let deleteStore = deleteTransaction.objectStore("Usuarios");
+                                deleteStore.clear();
+                                resolve();
+                            })
+                            .catch(reject);
+                    };
+                };
+
+                dbRequest.onerror = reject;
+            })
+        );
+    }
+});
+
+
+self.addEventListener('sync', event => {
+    if (event.tag === "syncUsuarios") {
+        event.waitUntil(
+            new Promise((resolve, reject) => {
+                let dbRequest = indexedDB.open("database", 1);
+
+                dbRequest.onsuccess = event => {
+                    let db = event.target.result;
+                    let transaction = db.transaction("Usuarios", "readonly");
+                    let store = transaction.objectStore("Usuarios");
+
+                    let getAllRequest = store.getAll();
+
+                    getAllRequest.onsuccess = () => {
+                        let Usuarios = getAllRequest.result;
+                        console.log("🔄 Intentando sincronizar usuarios:", Usuarios);
+
+                        if (Usuarios.length === 0) {
+                            console.log("✅ No hay usuarios pendientes de sincronización.");
+
+                            resolve();
+                            return;
+                        }
+
+                        let postPromises = Usuarios.map(Usuarios =>
+                            fetch('https://pwasb.onrender.com/api/subs/registro', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(Usuarios)
+                            })
+                        );
+
+                        Promise.all(postPromises)
+                            .then(() => {
+                                console.log("✅ Usuarios sincronizados con éxito.");
+
                                 let deleteTransaction = db.transaction("Usuarios", "readwrite");
                                 let deleteStore = deleteTransaction.objectStore("Usuarios");
                                 deleteStore.clear();

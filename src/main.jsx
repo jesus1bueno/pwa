@@ -5,7 +5,7 @@ import App from './App.jsx';
 import { BrowserRouter } from 'react-router-dom';
 import keys from '../keys.json'
 
-
+/*
 export async function registerServiceWorkerAndSubscribe() {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js', { type: 'module' })
@@ -50,7 +50,12 @@ export async function registerServiceWorkerAndSubscribe() {
       })
       .catch(error => console.error(' Error al registrar Service Worker:', error));
   }  
-}
+}*/
+navigator.serviceWorker.register('./sw.js', { type: 'module' })
+   .then((registro) => {
+     //console.log("Service Worker registrado correctamente:", registro);
+   })
+ .catch(error => console.error("Error al registrar el Service Worker:", error));
 
 
 
